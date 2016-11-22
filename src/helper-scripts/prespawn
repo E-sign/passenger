@@ -131,7 +131,11 @@ class TCPPrespawnLocation < PrespawnLocation
     begin
       TCPSocket.new('127.0.0.1', request_port)
     rescue Errno::ECONNREFUSED
-      TCPSocket.new('::1', request_port)
+      begin
+        TCPSocket.new('::1', request_port)
+      rescue Errno::ECONNREFUSED => e
+        raise "Attempted to bind to #{@uri.host} on port #{request_port}, with fallbacks: 127.0.0.1 and ::1 but failed each time. #{e}"
+      end
     end
   end
 end
